@@ -1,14 +1,27 @@
 import argparse
 import os
 import sys
-from ironveil import SubdomainEnumerator
-from ironveil.config import logger
+from ironveil.enumerator import SubdomainEnumerator
+from ironveil.config import logger, load_api_keys
 
-if __name__ == "__main__":
+def main():
     parser = argparse.ArgumentParser(description="Militarized Subdomain Enumerator and Verifier (Operation Iron Veil: Hardened & Sharpened)",
                                      formatter_class=argparse.RawTextHelpFormatter)
-    # (Copy argparse from original)
-
+    parser.add_argument("-d", "--domain", required=True, help="Target domain (e.g., example.com)")
+    parser.add_argument("-w", "--wordlist", help="Path to wordlist for brute-force. "
+                                                 "If not provided, a small default will be created.")
+    parser.add_argument("-o", "--output", help="Base path for output files (e.g., 'results.txt' will create 'results.jsonl' and 'results.csv').")
+    parser.add_argument("-t", "--threads", type=int, default=20, help="Number of concurrent threads (default: 20).")
+    parser.add_argument("--timeout", type=int, default=10, help="Request timeout in seconds for HTTP/S and DNS (default: 10).")
+    parser.add_argument("-v", "--verbose", action="store_true", help="Enable verbose logging (display debug messages).")
+    parser.add_argument("-r", "--recursion", type=int, default=0, help="Recursion depth for sub-subdomains (0 for none, max 2 recommended). "
+                                                                        "Caution: can significantly increase scan time and network load.")
+    parser.add_argument("-p", "--proxies", help="Path to a file containing proxies (e.g., http://user:pass@ip:port), one per line.")
+    parser.add_argument("--no-probe", action="store_false", dest="do_probe", help="Disable HTTP/S probing and verification of resolved subdomains.", default=True)
+    parser.add_argument("--port-scan", action="store_true", dest="do_port_scan", help="Enable basic port scanning on live HTTP/S subdomains for common ports.")
+    parser.add_argument("--rate-limit", type=float, default=0.0, help="Add a delay between requests *per thread* in seconds (e.g., 0.1 for 100ms delay). "
+                                                                       "Helps avoid rate limiting.")
+    
     args = parser.parse_args()
 
     if args.verbose:
@@ -16,9 +29,7 @@ if __name__ == "__main__":
     else:
         logger.setLevel(logging.INFO)
 
-    api_keys_config = {
-        'virustotal': os.getenv('VEIL_VT_API_KEY', ''),
-    }
+    api_keys_config = load_api_keys()
 
     if not args.output:
         args.output = f"{args.domain.replace('.', '_')}_recon_results.txt"
@@ -58,3 +69,6 @@ if __name__ == "__main__":
     except Exception as e:
         logger.critical(f"An unhandled error occurred during enumeration: {e}", exc_info=True)
         sys.exit(1)
+
+if __name__ == "__main__":
+    main()
