@@ -1,0 +1,17 @@
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+venv/
+*.egg-info/
+dist/
+build/
+*.egg
+*.swp
+*.swo
+*.log
+results*.txt
+results*.jsonl
+results*.csv
+default_subdomains_mini.txt
