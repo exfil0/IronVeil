@@ -1,0 +1,3 @@
+http://user:pass@192.168.1.1:8080
+http://192.168.1.2:3128
+# Add more proxies
