@@ -1,0 +1,22 @@
+[build-system]
+requires = ["setuptools>=42"]
+build-backend = "setuptools.build_meta"
+
+[tool.poetry]
+name = "ironveil"
+version = "0.1.0"
+description = "Militarized Subdomain Enumerator and Verifier"
+authors = ["exfil0 <your.email@example.com>"]
+license = "MIT"
+readme = "README.md"
+repository = "https://github.com/exfil0/IronVeil"
+
+[tool.poetry.dependencies]
+python = "^3.8"
+requests = "^2.32.3"
+dnspython = "^2.6.1"
+backoff = "^2.2.1"
+cryptography = "^43.0.0"
+
+[tool.poetry.scripts]
+ironveil = "ironveil.cli:main"
