@@ -21,15 +21,29 @@ The tool is multi-threaded for efficiency, resilient with backoff retries, and c
 - **Outputs:** TXT (live subs), JSONL (incremental detailed data), CSV (structured with all fields).
 - **Thread Safety:** Locks for shared data, efficient concurrency.
 
+## Installation
+
+Clone the repository:
+```
+git clone https://github.com/exfil0/IronVeil.git
+cd IronVeil
+```
+
+Install dependencies:
+```
+pip install -r requirements.txt
+```
+
+For CLI usage (install as package):
+```
+pip install -e .
+```
+This allows running as `ironveil [options]` instead of `python -m src.cli [options]`.
+
 ## Dependencies
 
-Install required Python packages:
-```
-pip install requests dnspython backoff cryptography
-```
-
-- **dnspython:** For DNS resolution and zone transfers.
 - **requests:** For HTTP/S probing and API calls.
+- **dnspython:** For DNS resolution and zone transfers.
 - **backoff:** For exponential backoff retries.
 - **cryptography:** For TLS cert parsing (SAN/CN extraction).
 
@@ -39,11 +53,11 @@ Note: No internet access required beyond APIs/web; no additional pip installs du
 
 ## Usage
 
-Run the script via CLI with `python script.py [options]`. Required: `--domain`.
+After installation, run via `ironveil [options]` (or `python -m src.cli [options]` without `-e` install). Required: `--domain`.
 
 ### CLI Options
 ```
-usage: script.py [-h] -d DOMAIN [-w WORDLIST] [-o OUTPUT] [-t THREADS] [--timeout TIMEOUT] [-v] [-r RECURSION] [-p PROXIES] [--no-probe] [--port-scan] [--rate-limit RATE_LIMIT]
+usage: ironveil [-h] -d DOMAIN [-w WORDLIST] [-o OUTPUT] [-t THREADS] [--timeout TIMEOUT] [-v] [-r RECURSION] [-p PROXIES] [--no-probe] [--port-scan] [--rate-limit RATE_LIMIT]
 
 Militarized Subdomain Enumerator and Verifier (Operation Iron Veil: Hardened & Sharpened)
 
@@ -73,41 +87,69 @@ options:
 
 1. **Basic Scan (Passive + Brute-Force):**
    ```
-   python script.py -d example.com -w subdomains.txt -v
+   ironveil -d example.com -w subdomains.txt -v
    ```
    - Uses default wordlist if not provided.
    - Verbose mode for detailed logs.
 
 2. **Full Scan with Probing, Port Scan, and Recursion:**
    ```
-   python script.py -d example.com -w subdomains-top1million.txt -o results.txt -r 1 --port-scan --rate-limit 0.2 -p proxies.txt
+   ironveil -d example.com -w subdomains-top1million.txt -o results.txt -r 1 --port-scan --rate-limit 0.2 -p proxies.txt
    ```
    - Enables recursion (depth 1), port scanning, 200ms delay per thread, proxies.
    - Outputs: results.txt (live subs), results.jsonl (detailed), results.csv (structured).
 
 3. **Passive-Only (No Active/Probe):**
    ```
-   python script.py -d example.com --no-probe
+   ironveil -d example.com --no-probe
    ```
    - Quick, stealthy recon from OSINT sources.
 
 4. **With VirusTotal API (Set Env Var):**
    ```
    export VEIL_VT_API_KEY=your_key_here
-   python script.py -d example.com
+   ironveil -d example.com
    ```
+
+## Project Structure
+```
+IronVeil/
+├── src/                  # Core source code
+│   ├── ironveil/         # Package namespace
+│   │   ├── __init__.py
+│   │   ├── config.py     # Constants, logger, API keys
+│   │   ├── enumerator.py # Main class
+│   │   ├── phases/       # Modular phases (passive, active, etc.)
+│   │   └── utils/        # Helpers (DNS, HTTP, output)
+│   └── cli.py            # CLI entry point
+├── tests/                # Unit tests
+├── docs/                 # Additional docs
+├── examples/             # Samples (wordlists, proxies)
+├── .gitignore
+├── LICENSE
+├── README.md
+├── requirements.txt
+├── setup.py
+└── pyproject.toml
+```
 
 ## API Keys
 Set environment variables for optional APIs:
 - `VEIL_VT_API_KEY`: VirusTotal (passive_virustotal).
 
-Add more in `api_keys_config` if extending sources.
+Add more in `src/ironveil/config.py` if extending sources.
 
 ## Ethical Considerations
 - **Legal Use Only:** Subdomain enumeration can be seen as reconnaissance. Obtain explicit permission before scanning third-party domains. Active probing/port scanning may trigger alerts or violate terms.
 - **Rate Limiting:** Use `--rate-limit` to respect API/DNS limits.
 - **Proxies:** For anonymity, but ensure ethical sourcing.
 - **No Guarantees:** "Without missing any" is aspirational—private subdomains can't be found publicly.
+
+## Contributing
+- Fork the repo and create a PR.
+- Add new passive sources in `phases/passive.py` and call in `phase_passive_recon`.
+- Run tests: `pytest tests/`.
+- Follow PEP8; add docs/tests for changes.
 
 ## Limitations & Future Improvements
 - IPv6 probing/port scan not fully supported (focuses on IPv4 primary IP).
