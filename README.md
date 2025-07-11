@@ -143,7 +143,6 @@ Add more in `src/ironveil/config.py` if extending sources.
 - **Legal Use Only:** Subdomain enumeration can be seen as reconnaissance. Obtain explicit permission before scanning third-party domains. Active probing/port scanning may trigger alerts or violate terms.
 - **Rate Limiting:** Use `--rate-limit` to respect API/DNS limits.
 - **Proxies:** For anonymity, but ensure ethical sourcing.
-- **No Guarantees:** "Without missing any" is aspirational—private subdomains can't be found publicly.
 
 ## Contributing
 - Fork the repo and create a PR.
