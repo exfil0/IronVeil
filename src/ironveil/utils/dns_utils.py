@@ -2,7 +2,7 @@ from ..config import logger
 import dns.resolver
 import random
 import time
-from .http_utils import get_session_with_proxy
+from ..phases.probing import probe_http_https
 
 def initialize_dns_resolver(self):
     self.dns_resolver = dns.resolver.Resolver()
@@ -26,10 +26,9 @@ def detect_wildcard(self):
         logger.debug(f" [.] No A record for random subdomain {random_full_domain}. No wildcard IP detected so far.")
         return None
 
-    # If an IP is found, attempt HTTP probe to get a content hash and title
     if resolved_ip and self.do_probe:
         try:
-            probe_info = self._probe_http_https(random_full_domain, resolved_ip, is_wildcard_check=True)
+            probe_info = probe_http_https(self, random_full_domain, resolved_ip, is_wildcard_check=True)
             if probe_info and probe_info.get('live_status_code') and probe_info['live_status_code'] < 400:
                 logger.warning(f" [!] Wildcard DNS for {self.domain} confirmed. IP: {resolved_ip}. Content hash/title will be used for filtering.")
                 return {
@@ -42,5 +41,4 @@ def detect_wildcard(self):
         except Exception as e:
             logger.warning(f" [!] Error during wildcard HTTP probe for {self.domain} ({resolved_ip}): {e}. Proceeding with IP-only wildcard detection.")
     
-    # Fallback: If no probe or probe failed, just use the IP for basic wildcard filtering
     return {'ip': resolved_ip, 'content_hash': None, 'title': None} if resolved_ip else None
