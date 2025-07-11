@@ -1,7 +1,9 @@
 from ..config import USER_AGENTS
 import random
+import time
 import requests
 import backoff
+from ..config import logger
 
 def get_session_with_proxy(self):
     session = requests.Session()
@@ -13,14 +15,13 @@ def get_session_with_proxy(self):
     
     return session
 
-@backoff.on_exception(backoff.expo, requests.exceptions.RequestException, max_tries=5, jitter=backoff.full_jitter)
+@backoff.on_exception(backoff.expo, requests.exceptions.RequestException, max_tries=5, jitter=backoff.full_jitter, logger=logger)
 def make_request(self, url, method="GET", json_data=None, data=None, headers=None, allow_redirects=True):
-    session = self._get_session_with_proxy()
+    session = get_session_with_proxy(self)
     req_headers = session.headers.copy()
     if headers:
         req_headers.update(headers)
     
-    # Introduce per-thread delay if configured
     if self.rate_limit_delay_per_thread > 0:
         time.sleep(self.rate_limit_delay_per_thread * random.uniform(0.8, 1.2))
 
